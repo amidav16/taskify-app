@@ -1,35 +1,70 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from "react";
+import "./App.css";
+import InputField from "./components/inputfield";
+import TodoList from "./components/todolist";
+import { DragDropContext, DropResult } from "react-beautiful-dnd";
+import { Todo } from "./models/models";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+  const [todo, setTodo] = useState<string>("");
+  const [todos, setTodos] = useState<Array<Todo>>([]);
+  const [CompletedTodos, setCompletedTodos] = useState<Array<Todo>>([]);
+  console.log("HI");
+
+  const handleAdd = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (todo) {
+      setTodos([...todos, { id: Date.now(), todo, isDone: false }]);
+      setTodo("");
+    }
+  };
+
+  const onDragEnd = (result: DropResult) => {
+    const { destination, source } = result;
+
+    console.log(result);
+
+    if (!destination) {
+      return;
+    }
+
+    if (destination.droppableId === source.droppableId && destination.index === source.index) {
+      return;
+    }
+
+    let add;
+    let active = todos;
+    let complete = CompletedTodos;
+    // Source Logic
+    if (source.droppableId === "TodosList") {
+      add = active[source.index];
+      active.splice(source.index, 1);
+    } else {
+      add = complete[source.index];
+      complete.splice(source.index, 1);
+    }
+
+    // Destination Logic
+    if (destination.droppableId === "TodosList") {
+      active.splice(destination.index, 0, add);
+    } else {
+      complete.splice(destination.index, 0, add);
+    }
+
+    setCompletedTodos(complete);
+    setTodos(active);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div className="App">
+        <span className="heading">Taskify</span>
+        <InputField todo={todo} setTodo={setTodo} handleAdd={handleAdd} />
+        <TodoList todos={todos} setTodos={setTodos} CompletedTodos={CompletedTodos} setCompletedTodos={setCompletedTodos} />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    </DragDropContext>
+  );
+};
 
-export default App
+export default App;
