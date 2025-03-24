@@ -14,6 +14,10 @@ const SingleTodo: React.FC<{
   const [edit, setEdit] = useState<boolean>(false);
   const [editTodo, setEditTodo] = useState<string>(todo.todo);
 
+  const EditIcon = AiFillEdit as unknown as React.FC;
+  const DeleteIcon = AiFillDelete as unknown as React.FC;
+  const DoneIcon = MdDone as unknown as React.FC;
+
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     inputRef.current?.focus();
@@ -64,13 +68,13 @@ const SingleTodo: React.FC<{
                 }
               }}
             >
-              <AiFillEdit />
+              <DoneIcon />
             </span>
             <span className="icon" onClick={() => handleDelete(todo.id)}>
-              <AiFillDelete />
+              <DeleteIcon />
             </span>
             <span className="icon" onClick={() => handleDone(todo.id)}>
-              <MdDone />
+              <EditIcon />
             </span>
           </div>
         </form>
